@@ -1,0 +1,16 @@
+How To Compile:
+
+cd storm
+mvn install -DskipTests=true
+cd storm-dist/binary/
+mvn package -Dgpg.skip=true
+
+How To Run:
+cd storm/storm-dist/binary/target/
+tar -xvzf apache-storm-2.0.0-SNAPSHOT.tar.gz
+cd apache-storm-2.0.0
+apache/storm nimbus
+apache/storm supervisor
+
+Run EventCount Topology:
+bin/storm jar ~/storm/external/storm-eventhubs/storm-eventhubs-2.0.0-SNAPSHOT-jar-with-dependencies.jar org.apache.storm.eventhubs.samples.EventCount EventCount Config.properties
