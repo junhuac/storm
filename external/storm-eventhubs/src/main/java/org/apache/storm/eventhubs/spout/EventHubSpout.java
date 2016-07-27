@@ -120,18 +120,35 @@ public class EventHubSpout extends BaseRichSpout {
         }
         zkEndpointAddress = sb.toString();
       }
+
+      try {
       stateStore = new ZookeeperStateStore(zkEndpointAddress,
-          (Integer)config.get(Config.STORM_ZOOKEEPER_RETRY_TIMES),
-          (Integer)config.get(Config.STORM_ZOOKEEPER_RETRY_INTERVAL));
+          ((Long)config.get(Config.STORM_ZOOKEEPER_RETRY_TIMES)).intValue(),
+          ((Long)config.get(Config.STORM_ZOOKEEPER_RETRY_INTERVAL)).intValue());
+      } catch (Exception e) {
+      logger.error(e.getMessage());
+      throw new RuntimeException(e);      
+      }
     }
+    try {
     stateStore.open();
+    } catch (Exception e) {
+    logger.error(e.getMessage());
+    throw new RuntimeException(e);
+    }
 
     partitionCoordinator = new StaticPartitionCoordinator(
         eventHubConfig, taskIndex, totalTasks, stateStore, pmFactory, recvFactory);
 
     for (IPartitionManager partitionManager : 
       partitionCoordinator.getMyPartitionManagers()) {
+      try {
       partitionManager.open();
+      } catch (Exception e) {
+      logger.error(e.getMessage());
+      throw new RuntimeException(e);
+      }
+
     }
   }
 
@@ -167,7 +184,7 @@ public class EventHubSpout extends BaseRichSpout {
           }
           return concatMetricsDataMaps;
       }
-    }, (Integer)config.get(Config.TOPOLOGY_BUILTIN_METRICS_BUCKET_SIZE_SECS));
+    }, ((Long)config.get(Config.TOPOLOGY_BUILTIN_METRICS_BUCKET_SIZE_SECS)).intValue());
     logger.info("end open()");
   }
 
